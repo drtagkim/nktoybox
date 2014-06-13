@@ -21,12 +21,9 @@ class AdapterBehaviorAgileTeam(AdapterBehavior):
         AdapterBehavior.__init__(self, agent_clan,agent)
     def execute(self,agent, plan):
         #rewrite from here
-        agent.true_performance = self.agent_clan.landscape.get_score_of_location_by_id(agent.my_id)
-        agent.expected_performance = agent.true_performance
-        current_score = agent.expected_performance #casue agile gets feedback right away
-        # base
         new_id = agent.my_id
         new_performance = agent.true_performance
+        current_score = agent.expected_performance #casue agile gets feedback right away
         # an incremental experiential search
         neighbors = set(self.agent_clan.landscape.who_are_neighbors(agent.my_id,plan,self.agent_clan.myProcessingPower,False)) #except me
         neighbors_np = np.array(list(neighbors),dtype=np.int)
@@ -36,32 +33,15 @@ class AdapterBehaviorAgileTeam(AdapterBehavior):
                                 int(neighbor_id),
                                 uncertainty_base = self.agent_clan.uncertainty_base,
                                 func = linear_uncertainty,
-                                tick = agent.ct,
-                                total_tick = agent.tick_end)
+                                tick = agent.I,
+                                total_tick = agent.IN)
             if current_score < new_score and not agent.visited_ids.has_key(int(neighbor_id)):
-                #new_id = int(neighbor_id)
                 neighbor_id_int = int(neighbor_id)
-                # marketing
+                agent.wanna_be_my_id = neighbor_id_int
+                new_id = neighbor_id_int # jump to the location, no feedback
+                agent.visited_ids[new_id]='v'
+                new_performance = self.agent_clan.landscape.get_score_of_location_by_id(new_id)
                 agent.expected_performance = new_score
-                agent.wanna_be_my_id = new_id
-                # feedback from customers
-                new_score_true = self.agent_clan.landscape.get_score_of_location_by_id(neighbor_id_int)
-                if agent.true_performance < new_score_true:
-                    # success
-                    new_id = neighbor_id_int
-                    new_performance = new_score_true
-                    # visited
-                    agent.visited_ids[new_id]='v'
-                    break
-                else:
-                    # fail
-                    current_score = new_score_true
-                    agent.my_id = neighbor_id_int
-                    agent.visited_ids[agent.my_id] = 'v'
-                    agent.true_performance = current_score
-                    agent.expected_performance = current_score
-                    new_id = agent.my_id
-                    new_performance = current_score
         return (new_id,new_performance)
     def my_profile(cls):
         rv = "----------------------------\n%s\n----------------------------\n" % ("Agile Development Team")
@@ -74,14 +54,11 @@ class AdapterBehaviorWaterfallTeam(AdapterBehavior):
     def __init__(self, agent_clan, agent):
         AdapterBehavior.__init__(self, agent_clan,agent)
     def execute(self,agent, plan):
-        agent.true_performance = self.agent_clan.landscape.get_score_of_location_by_id(agent.my_id) # now waterfall team gets feedback from users
-        agent.expected_performance = agent.true_performance
         # base
         new_id = agent.my_id
         new_performance = agent.true_performance
         # requirement collection
-        current_score = agent.true_performance # exact information from the start
-        
+        current_score = agent.expected_performance # exact information from the start
         neighbors = set(self.agent_clan.landscape.who_are_neighbors(agent.my_id,plan,self.agent_clan.myProcessingPower,False)) #except me
         neighbors_np = np.array(list(neighbors),dtype=np.int)
         np.random.shuffle(neighbors_np) #randomly select configuration (by luck)
@@ -90,14 +67,15 @@ class AdapterBehaviorWaterfallTeam(AdapterBehavior):
                                 int(neighbor_id),
                                 uncertainty_base = self.agent_clan.uncertainty_base,
                                 func = linear_uncertainty,
-                                tick = agent.ct,
-                                total_tick = agent.tick_end)            
+                                tick = agent.I,
+                                total_tick = agent.IN)            
             if current_score < new_score and not agent.visited_ids.has_key(int(neighbor_id)):
                 neighbor_id_int = int(neighbor_id)
                 agent.wanna_be_my_id = neighbor_id_int
                 new_id = neighbor_id_int # jump to the location, no feedback
                 agent.visited_ids[new_id]='v'
-                new_performance = self.agent_clan.landscape.get_score_of_location_by_id(new_id) 
+                new_performance = self.agent_clan.landscape.get_score_of_location_by_id(new_id)
+                agent.expected_performance = new_score
         return (new_id,new_performance)
     def my_profile(cls):
         rv = "----------------------------\n%s\n----------------------------\n" % ("Waterfall Development Team")

@@ -171,6 +171,11 @@ class FitnessContributionTable:
         self.dim_3 = 1 << self.influence_matrix.my_K # i.e., power of 2 by K
         self.my_table = RandomGenerator.random_generator.rand(self.dim_1,self.dim_2,self.dim_3) #Mersenne Twister Random Generator
             # random generate of three dimensional table
+    def refresh(self,random_seed=None):
+        if random_seed != None:
+            self.random_seed = random_seed
+        RandomGenerator.set_seed(self.random_seed)
+        self.my_table = RandomGenerator.random_generator.rand(self.dim_1,self.dim_2,self.dim_3) #Mersenne Twister Random Generator   
     def get_value_of(self, index_1, index_2, index_3):
         #return inf_util.get_value_of(self.my_table,index_1,index_2,index_3)
         return self.my_table[index_1][index_2][index_3]

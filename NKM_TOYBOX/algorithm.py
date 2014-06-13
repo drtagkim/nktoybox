@@ -14,7 +14,8 @@ The following arguments should be included: uncertainty_base, c_i, tick and tota
     import numpy.random as NPRD
     import numpy as NP
     ep = NPRD.rand(c_i.size)
-    fit_value_uncertain = float(NP.mean((1 - uncertainty_base) * c_i + uncertainty_base * ep))
+    uc = (1 - tick/float(total_tick)) * uncertainty_base
+    fit_value_uncertain = float(NP.mean((1 - uc) * c_i + uc * ep))
     return fit_value_uncertain
 def linear_shock(contribution_table,shock):
     import numpy.random as NPRD

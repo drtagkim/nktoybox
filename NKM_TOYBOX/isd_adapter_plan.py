@@ -12,6 +12,7 @@ Jungpil and Taekyung
 import numpy as np
 from algorithm import linear_uncertainty
 from simulator import AdapterPlan
+from isd_agent import AgileDeveloper,WaterfallDeveloper
 class AdapterPlanISD(AdapterPlan):
     """
 |  ISD Simulation plan
@@ -32,13 +33,14 @@ class AdapterPlanISD(AdapterPlan):
         current_behavior = self.adapter_behavior(self.agent_clan,agent) #define a behavior adapter
         break_marker = False #stop marker
         ct = 0 #current time
+        agent.IN = len(agent.plans)
         #### INITIALIZATION ####
         agent.expected_performance = self.agent_clan.landscape.get_noised_score_of_location_by_id(
                                     agent.my_id,
                                     func = linear_uncertainty,
                                     uncertainty_base = self.uncertainty_base,
-                                    tick = ct,
-                                    total_tick = agent.tick_end)
+                                    tick = agent.I,
+                                    total_tick = agent.agent.IN)
         # expected performance := true fitness value +- error (i.e., uncertainty ~ uniform(given range))
         # When a project starts, nobody knows feedback from customers. The team may rely on market research data.
         agent.true_performance = self.agent_clan.landscape.get_score_of_location_by_id(agent.my_id)
@@ -50,10 +52,9 @@ class AdapterPlanISD(AdapterPlan):
         # Since the starting point is already visited...
         agent.wanna_be_my_id = agent.my_id # not want to go anywhere at start
         # Do not want to go somewhere now...
-
         #### SEARCHING ####
-        while 1:
-            for plan in agent.plans: #per each plan
+        for plan in agent.plans: #per each plan
+            while 1:
                 agent.ct = ct # let him know the current tick(=time)
                 (agent.my_id, agent.true_performance) = current_behavior.execute(agent, plan) #update
                 agent.performance = agent.true_performance
@@ -61,7 +62,12 @@ class AdapterPlanISD(AdapterPlan):
                 self.simulator.write_record(agent) # write a record after work
                 if ct >= self.tick_end: # if ticks are over the target number,
                     break_marker = True # let the break mark true
-                    break #abandon the plan
+                    break # stop improving
+            # feedback
+            if isinstance(agent,AgileDeveloper):
+                agent.I = agent.I + 1 # reduce uncertainty if, an agile developer
+            agent.expected_performance = agent.true_performance # let the agent know about the true performance
+            # finalize
             if break_marker == True:
                 break
 # END OF PROGRAM #

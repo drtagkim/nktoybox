@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -15,7 +13,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -120,7 +118,7 @@
 </div>
 <p>The utility function, &#8220;count_local_peak&#8221;, calculates the number of local peaks. If you want to monitor the process, set <em>quietly</em> = False. The default value is True.</p>
 <div class="figure align-center">
-<img alt="_images/low_dimensionality_local_peaks.png" src="_images/low_dimensionality_local_peaks.png" style="width: 700px;" />
+<a class="reference internal image-reference" href="_images/low_dimensionality_local_peaks.png"><img alt="_images/low_dimensionality_local_peaks.png" src="_images/low_dimensionality_local_peaks.png" style="width: 700px;" /></a>
 <p class="caption">Number of Local Peaks</p>
 </div>
 <p>We can obtain the above image by setting ten simulations with N=10, K=9, and <span class="math">\(N_{1}=9\)</span>. The plotted numbers are mean values.</p>
@@ -146,15 +144,17 @@
  9
 10
 11
-12</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy.random</span> <span class="kn">as</span> <span class="nn">NPRD</span> <span class="c"># for generating numbers from uniform distribution</span>
+12
+13</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy.random</span> <span class="kn">as</span> <span class="nn">NPRD</span> <span class="c"># for generating numbers from uniform distribution</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">NP</span> <span class="c">#NumPy package</span>
 
 <span class="k">def</span> <span class="nf">linear_uncertainty</span><span class="p">(</span><span class="n">uncertainty_base</span><span class="p">,</span> <span class="n">c_i</span><span class="p">,</span> <span class="n">tick</span><span class="p">,</span> <span class="n">total_tick</span><span class="p">):</span>
     <span class="c"># use the exact names: uncertainty_base, c_i, tick and total_tick</span>
     <span class="c"># c_i is a numpy array object. It contains given contribution values.</span>
     <span class="n">ep</span> <span class="o">=</span> <span class="n">NPRD</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">c_i</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="c"># Epsilon vector</span>
+    <span class="n">uc</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">tick</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">total_tick</span><span class="p">))</span> <span class="o">*</span> <span class="n">uncertainty_base</span>
     <span class="n">fit_value_uncertain</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">NP</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
-              <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">uncertainty_base</span><span class="p">)</span> <span class="o">*</span> <span class="n">c_i</span> <span class="o">+</span> <span class="n">uncertainty_base</span> <span class="o">*</span> <span class="n">ep</span>
+              <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">uc</span><span class="p">)</span> <span class="o">*</span> <span class="n">c_i</span> <span class="o">+</span> <span class="n">uc</span> <span class="o">*</span> <span class="n">ep</span>
     <span class="p">))</span>
     <span class="c"># the return value is the average of contribution effects.</span>
     <span class="k">return</span> <span class="n">fit_value_uncertain</span>
@@ -527,7 +527,7 @@
     <div class="footer">
         &copy; Copyright 2014, Jungpil Hahn and Taekyung Kim.
       Last updated on 05 June, 2014.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
     </div>
   </body>
 </html>

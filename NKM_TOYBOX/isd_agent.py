@@ -23,6 +23,8 @@ class AgileDeveloper(Agent):
         self.expected_performance = 0
         self.wanna_be_my_id = -1
         self.plans = [[]]
+        self.I = 0 #iteration index
+        self.IN = 0 #total length of iteration
 class WaterfallDeveloper(Agent):
     """
 |  A development team adopting the waterfall methodology
@@ -34,6 +36,8 @@ class WaterfallDeveloper(Agent):
         self.wanna_be_my_id = -1
         self.plans = [[]]
         self.feedback_tick = 5 # timespan of taking feedback from users (or customers)
+        self.I = 0 #iteration index
+        self.IN = 1 #total length of iteration
 class AgileDeveloperClan(AgentClan):
     """
 |  A clan is an abstract container that defines common attributes of agents
