@@ -106,6 +106,8 @@ class AgentClan:
                 self.landscape.get_influence_matrix_N(),
                 self.landscape.get_influence_matrix_K())
         return rv
+    def my_profile(self):
+        return(self.myProcessingPower,self.landscape.get_influence_matrix_N(),self.landscape.get_influence_matrix_K())
 class AgentClanTeamUp(AgentClan):
     def __init__(self,landscapeA, landscapeB, processing_power, agent_class, population=1):
         """

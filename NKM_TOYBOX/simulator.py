@@ -9,7 +9,7 @@ Jungpil and Taekyung
 2014
 '''
 import numpy as np
-import csv, time, gzip
+import csv, time, gzip, copy, sqlite3, gzip, os
 import RandomGenerator
 from landscape import LandscapeAdaptive
 
@@ -27,11 +27,14 @@ class SimRecord:
 class Simulator:
     def __init__(self,agent_clan):
         self.agent_clan = agent_clan
+        self.current_record = []
         self.simulation_record = []
         self.sim_code = 0
         self.random_seed = -1
+        self.note="" #for database recording
     def run(self, tick_end, adapter_plan, adapter_behavior):
         #
+        self.current_record = []
         self.random_seed = self.agent_clan.landscape.fitness_contribution_table.random_seed
         self.sim_code += 1
         agent_clan = self.agent_clan
@@ -43,11 +46,12 @@ class Simulator:
             my_plan.run()
         if isinstance(agent_clan.landscape, LandscapeAdaptive):
             agent_clan.landscape.standardize()
-            for record in self.simulation_record:
+            for record in self.current_record:
                 record.performance = agent_clan.landscape.get_standardized_value(record.performance)
+        self.simulation_record.extend(copy.deepcopy(self.current_record))
     def write_record(self,agent):
         sr = SimRecord(agent.my_id, agent.plans, agent.ct, agent.performance, self.sim_code, self.random_seed)
-        self.simulation_record.append(sr)
+        self.current_record.append(sr)
     def export_record(self,file_name):
         #for plot
         simple_simulation_record = [(sr.ct,sr.performance) for sr in self.simulation_record]
@@ -60,16 +64,42 @@ class Simulator:
         file_name_plot = "%s_spreadsheet_plot.txt" % file_name
         np.savetxt(file_name_plot,a,fmt=['%d','%.4f'],delimiter=',')
         #for record
-        file_name_record = "%s_record.gz" % file_name
-        f_record = gzip.open(file_name_record,'wb')
-        writer = csv.writer(f_record,lineterminator='\n',delimiter='\t')
-        writer.writerow(['location_id','tick','plan','performance','simulation_code','random_seed'])
+        processing_power,land_n,land_k = self.agent_clan.my_profile()
+        db_fname = "%s_record.sqlite3.db" % file_name
+        conn = sqlite3.connect(db_fname)
+        cursor = conn.cursor() #cursor
+        # create schema
+        sql = """CREATE TABLE IF NOT EXISTS nk_record 
+            (location_id NUMBER,
+            tick NUMBER,
+            plan TEXT,
+            performance NUMBER,
+            simulation_code NUMBER,
+            random_seed NUMBER, 
+            processing_power NUMBER,
+            N NUMBER,
+            K NUMBER,
+            note TEXT);""" #no index
+        cursor.execute(sql)
+        conn.commit()
+        sql = """INSERT INTO nk_record 
+                (location_id,tick,plan,performance,simulation_code,random_seed,processing_power,N,K,note) 
+                VALUES (?,?,?,?,?,?,?,?,?,?);"""
         for sr in self.simulation_record:
-            writer.writerow([sr.location_id, sr.ct, sr.plan, sr.performance, sr.sim_code, sr.random_seed])
-        f_record.close()
+            cursor.execute(sql,(sr.location_id, sr.ct, sr.plan, sr.performance, sr.sim_code, sr.random_seed,processing_power,land_n,land_k,self.note))
+        conn.commit()
+        conn.close()
+        # compress the file
+        fin = open(db_fname,'rb')
+        fout = open("%s.gz"%db_fname,'wb')
+        fout.writelines(fin)
+        fout.close()
+        fin.close()
+        # remove the db file
+        os.remove(db_fname)
         #for profile
         plan_profile = self.adapter_plan_profile
-        clan_profile =  self.agent_clan.__str__()
+        clan_data =  self.agent_clan.__str__()
         behavior_profile = self.adapter_behavior_profile
         time_stamp = time.ctime()
         file_name_profile = "%s_profile.txt" % file_name
@@ -80,7 +110,7 @@ class Simulator:
         f_profile.write("\nRandom seed:%d\n"%RandomGenerator.get_current_seed())
         f_profile.write("\n%s\n"%time_stamp)
         f_profile.write("\n%s\n"%plan_profile)
-        f_profile.write("\n%s\n"%clan_profile)
+        f_profile.write("\n%s\n"%clan_data)
         f_profile.write("\n%s\n"%behavior_profile)
         f_profile.close()
 class AdapterPlan:
