@@ -60,6 +60,8 @@ class AdapterPlanISD(AdapterPlan):
         agent.wanna_be_my_id = agent.my_id # not want to go anywhere at start
         # Do not want to go somewhere now...
         #### SEARCHING ####
+        q = agent.tick_end / len(agent.plans)
+        
         for plan in agent.plans: #per each plan
             while 1:
                 agent.ct = ct # let him know the current tick(=time)
@@ -67,13 +69,21 @@ class AdapterPlanISD(AdapterPlan):
                 agent.performance = agent.true_performance
                 ct += 1 # increase time
                 self.simulator.write_record(agent) # write a record after work
+                # for agile
+                if isinstance(agent, AgileDeveloper):
+                    if ct != 0 and ct % q == 0: #break point
+                        #feedback
+                        agent.I = agent.I + 1 # reduce uncertainty if, an agile developer
+                        agent.expected_performance = agent.true_performance # let the agent know about the true performance
+                        if ct >= self.tick_end:
+                            break_marker = True
+                        break
+                    if ct >= self.tick_end:
+                        break_marker = True
+                        break
                 if ct >= self.tick_end: # if ticks are over the target number,
                     break_marker = True # let the break mark true
                     break # stop improving
-            # feedback
-            if isinstance(agent,AgileDeveloper):
-                agent.I = agent.I + 1 # reduce uncertainty if, an agile developer
-            agent.expected_performance = agent.true_performance # let the agent know about the true performance
             # finalize
             if break_marker == True:
                 break

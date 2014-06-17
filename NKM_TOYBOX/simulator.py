@@ -89,14 +89,6 @@ class Simulator:
             cursor.execute(sql,(sr.location_id, sr.ct, sr.plan, sr.performance, sr.sim_code, sr.random_seed,processing_power,land_n,land_k,self.note))
         conn.commit()
         conn.close()
-        # compress the file
-        fin = open(db_fname,'rb')
-        fout = open("%s.gz"%db_fname,'wb')
-        fout.writelines(fin)
-        fout.close()
-        fin.close()
-        # remove the db file
-        os.remove(db_fname)
         #for profile
         plan_profile = self.adapter_plan_profile
         clan_data =  self.agent_clan.__str__()
