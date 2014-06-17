@@ -12,14 +12,20 @@ Jungpil and Taekyung
 import numpy as np
 from algorithm import linear_uncertainty
 from simulator import AdapterPlan
-from isd_agent import AgileDeveloper,WaterfallDeveloper
+from isd_agent import AgileDeveloper, WaterfallDeveloper
+
 class AdapterPlanISD(AdapterPlan):
     """
 |  ISD Simulation plan
 |  Parameters: simulator object, behavior class, agent clan, focused agent, target time run
     """
     def __init__(self, simulator, adapter_behavior, agent_clan, agent, tick_end):
-        AdapterPlan.__init__(self,simulator=simulator, adapter_behavior=adapter_behavior, agent_clan=agent_clan, agent=agent, tick_end=tick_end)
+        AdapterPlan.__init__(self,
+                             simulator = simulator, 
+                             adapter_behavior = adapter_behavior, 
+                             agent_clan = agent_clan, 
+                             agent = agent, 
+                             tick_end = tick_end)
     def my_profile(cls):
         return "\nPlan for ISD Development Simulation\n"
     profile = classmethod(my_profile)
@@ -32,10 +38,11 @@ class AdapterPlanISD(AdapterPlan):
         agent.tick_end = self.tick_end
         current_behavior = self.adapter_behavior(self.agent_clan,agent) #define a behavior adapter
         break_marker = False #stop marker
+        landscape = self.agent_clan.landscape
         ct = 0 #current time
-        agent.IN = len(agent.plans)
+        agent.IN = len(agent.plans) #for waterfall, anyway just one plan...
         #### INITIALIZATION ####
-        agent.expected_performance = self.agent_clan.landscape.get_noised_score_of_location_by_id(
+        agent.expected_performance = landscape.get_noised_score_of_location_by_id(
                                     agent.my_id,
                                     func = linear_uncertainty,
                                     uncertainty_base = self.uncertainty_base,
@@ -43,7 +50,7 @@ class AdapterPlanISD(AdapterPlan):
                                     total_tick = agent.agent.IN)
         # expected performance := true fitness value +- error (i.e., uncertainty ~ uniform(given range))
         # When a project starts, nobody knows feedback from customers. The team may rely on market research data.
-        agent.true_performance = self.agent_clan.landscape.get_score_of_location_by_id(agent.my_id)
+        agent.true_performance = landscape.get_score_of_location_by_id(agent.my_id)
         agent.performance = agent.true_performance
         # But God knows a true performance.
         self.simulator.write_record(agent)

@@ -23,14 +23,14 @@ class AgileDeveloper(Agent):
         self.expected_performance = 0
         self.wanna_be_my_id = -1
         self.plans = [[]]
-        self.I = 0 #iteration index
-        self.IN = 0 #total length of iteration
+        self.I = 1 #iteration index
+        self.IN = 1 #total length of iteration
 class WaterfallDeveloper(Agent):
     """
 |  A development team adopting the waterfall methodology
     """
     def __init__(self, my_id, my_clan):
-        Agent.__init__(self,my_id=my_id,my_clan=my_clan)
+        Agent.__init__(self, my_id = my_id, my_clan = my_clan)
         self.true_performance = 0
         self.expected_performance = 0
         self.wanna_be_my_id = -1
@@ -43,8 +43,12 @@ class AgileDeveloperClan(AgentClan):
 |  A clan is an abstract container that defines common attributes of agents
 |  This class is about the clan of agile development teams
     """
-    def __init__(self,landscape, processing_power, agent_class, population=1):
-        AgentClan.__init__(self,landscape=landscape, processing_power=processing_power, agent_class=agent_class, population=population)
+    def __init__(self, landscape, processing_power, agent_class, population = 1):
+        AgentClan.__init__(self, 
+                           landscape = landscape, 
+                           processing_power = processing_power, 
+                           agent_class = agent_class, 
+                           population = population)
         self.uncertainty_base = 0.0
         self.modularity_degree = ''
     def hatch_members(self):
@@ -52,8 +56,8 @@ class AgileDeveloperClan(AgentClan):
 |  A clan is just a container. We need agents first. Make them.
         """
         assert self.iteration_plan != None, "No plans..."
-        space_length = 1<<self.landscape.get_influence_matrix_N() #playground
-        upper_limit = space_length-1 #set upper so that starts with zero
+        space_length = 1 << self.landscape.get_influence_matrix_N() #playground
+        upper_limit = space_length - 1 #set upper so that starts with zero
         self.tribe = deque() #tribe as deque collections (C type)
         add_member = self.tribe.append #declar append reference
         for _ in xrange(self.total_num): #for each...
@@ -81,8 +85,12 @@ class WaterfallDeveloperClan(AgentClan):
 |  A clan is an abstract container that defines common attributes of agents
 |  This class is about the clan of waterfall development teams
     """
-    def __init__(self,landscape, processing_power, agent_class, population=1, feedback_tick = 5):
-        AgentClan.__init__(self,landscape=landscape, processing_power=processing_power, agent_class=agent_class, population=population)
+    def __init__(self, landscape, processing_power, agent_class, population = 1, feedback_tick = 5):
+        AgentClan.__init__(self, 
+                           landscape = landscape, 
+                           processing_power = processing_power, 
+                           agent_class = agent_class, 
+                           population = population)
         self.uncertainty_base = 0.0
         self.modularity_degree = ''
         self.feedback_tick = feedback_tick # get feedback on every fifth tick
@@ -91,15 +99,15 @@ class WaterfallDeveloperClan(AgentClan):
 |  see AgileDeveloperClan...
         """
         assert self.iteration_plan != None, "No plans..."
-        space_length = 1<<self.landscape.get_influence_matrix_N()
+        space_length = 1 << self.landscape.get_influence_matrix_N()
         upper_limit = space_length-1
         self.tribe = deque()
         add_member = self.tribe.append
         for _ in xrange(self.total_num):
             member_loc_id = random.randint(0,upper_limit)
             agent = self.agent_class(member_loc_id,self)
-            agent.visited_ids[member_loc_id] = 'v' #visit
-            agent.plans = copy.deepcopy(self.iteration_plan) # add
+            agent.visited_ids[member_loc_id] = 'v'
+            agent.plans = copy.deepcopy(self.iteration_plan)
             agent.feedback_tick = self.feedback_tick
             add_member(agent)
         self.number_of_not_finished = self.total_num

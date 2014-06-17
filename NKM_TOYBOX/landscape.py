@@ -189,7 +189,11 @@ class FitnessContributionTable:
         result = "%s%s\n" % (str_info,str_table,)
         return result
 class Landscape:
-    def __init__(self,influence_matrix = None,fitness_contribution_matrix = None):
+    def __init__(self,
+                 influence_matrix = None,
+                 fitness_contribution_matrix = None, 
+                 precision = 4):
+        NP.set_printoptions(precision = precision)
         self.influence_matrix = influence_matrix
         self.locations_list = []
         self.fitness_value = NP.array([])
@@ -239,7 +243,6 @@ class Landscape:
             for l_id in xrange(map_size):
                 result_temp_add(self.compute_score_for_location_id(l_id,fix_plan = fix_plan))
             self.fitness_value = NP.array(result_temp)
-        self.fitness_value = NP.around(self.fitness_value,4)
     def compute_score_for_location_id(self,location_id,fix_plan=None,reduced=True):
         """
 |  Compute and return the fitness value of the given location id.
@@ -423,8 +426,11 @@ See also, the topic of dealing uncertainty in the documentation.
         return fitness_value / float(self.fitness_max)
 # =====================================
 class LandscapeAdaptive(Landscape):
-    def __init__(self,influence_matrix = None,fitness_contribution_matrix = None):
-        Landscape.__init__(self,influence_matrix=influence_matrix,fitness_contribution_matrix=fitness_contribution_matrix)
+    def __init__(self,influence_matrix = None,fitness_contribution_matrix = None, precision = 4):
+        Landscape.__init__(self,
+                           influence_matrix = influence_matrix,
+                           fitness_contribution_matrix = fitness_contribution_matrix, 
+                           precision = precision)
         self.fitness_value_dict = {} # main data set
         self.fitness_correction_item = {} #c_i for algorithm
         self.fix_plan = None
