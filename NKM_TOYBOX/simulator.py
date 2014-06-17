@@ -32,7 +32,7 @@ class Simulator:
         self.random_seed = -1
     def run(self, tick_end, adapter_plan, adapter_behavior):
         #
-        self.random_seed = adapter_plan.landscape.fitness_contribution_table.random_seed
+        self.random_seed = self.agent_clan.landscape.fitness_contribution_table.random_seed
         self.sim_code += 1
         agent_clan = self.agent_clan
         agent_clan.refresh_clan()
