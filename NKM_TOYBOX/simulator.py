@@ -11,13 +11,16 @@ Jungpil and Taekyung
 import numpy as np
 import csv, time, gzip
 import RandomGenerator
+from landscape import LandscapeAdaptive
 
 class SimRecord:
-    def __init__(self, my_id, plan, ct, performance):
+    def __init__(self, my_id, plan, ct, performance, sim_code, random_seed):
         self.location_id = my_id
         self.plan = self.str_plan(plan)
         self.ct = ct
         self.performance = performance
+        self.sim_code = sim_code
+        self.random_seed = random_seed
     def str_plan(self,plan_as_list):
         rv = "-".join(map(str,plan_as_list))
         return rv
@@ -25,7 +28,12 @@ class Simulator:
     def __init__(self,agent_clan):
         self.agent_clan = agent_clan
         self.simulation_record = []
+        self.sim_code = 0
+        self.random_seed = -1
     def run(self, tick_end, adapter_plan, adapter_behavior):
+        #
+        self.random_seed = adapter_plan.landscape.fitness_contribution_table.random_seed
+        self.sim_code += 1
         agent_clan = self.agent_clan
         agent_clan.refresh_clan()
         self.adapter_plan_profile = adapter_plan.profile()
@@ -33,14 +41,14 @@ class Simulator:
         for agent in agent_clan.tribe:
             my_plan = adapter_plan(self, adapter_behavior, agent_clan, agent, tick_end)
             my_plan.run()
+        if isinstance(agent_clan.landscape, LandscapeAdaptive):
+            agent_clan.landscape.standardize()
+            for record in self.simulation_record:
+                record.performance = agent_clan.landscape.get_standardized_value(record.performance)
     def write_record(self,agent):
-        sr = SimRecord(agent.my_id,agent.plans,agent.ct,agent.performance)
+        sr = SimRecord(agent.my_id, agent.plans, agent.ct, agent.performance, self.sim_code, self.random_seed)
         self.simulation_record.append(sr)
     def export_record(self,file_name):
-        #standardized values
-        land = self.agent_clan.landscape
-        for sr in self.simulation_record:
-            sr.performance = land.get_standardized_value(sr.performance)
         #for plot
         simple_simulation_record = [(sr.ct,sr.performance) for sr in self.simulation_record]
         nrow = len(simple_simulation_record)
@@ -55,9 +63,9 @@ class Simulator:
         file_name_record = "%s_record.gz" % file_name
         f_record = gzip.open(file_name_record,'wb')
         writer = csv.writer(f_record,lineterminator='\n',delimiter='\t')
-        writer.writerow(['location_id','tick','plan','fitness'])
+        writer.writerow(['location_id','tick','plan','performance','simulation_code','random_seed'])
         for sr in self.simulation_record:
-            writer.writerow([sr.location_id, sr.ct, sr.plan, sr.performance])
+            writer.writerow([sr.location_id, sr.ct, sr.plan, sr.performance, sr.sim_code, sr.random_seed])
         f_record.close()
         #for profile
         plan_profile = self.adapter_plan_profile

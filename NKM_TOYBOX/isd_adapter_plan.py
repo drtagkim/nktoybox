@@ -47,7 +47,7 @@ class AdapterPlanISD(AdapterPlan):
                                     func = linear_uncertainty,
                                     uncertainty_base = self.uncertainty_base,
                                     tick = agent.I,
-                                    total_tick = agent.agent.IN)
+                                    total_tick = agent.IN)
         # expected performance := true fitness value +- error (i.e., uncertainty ~ uniform(given range))
         # When a project starts, nobody knows feedback from customers. The team may rely on market research data.
         agent.true_performance = landscape.get_score_of_location_by_id(agent.my_id)

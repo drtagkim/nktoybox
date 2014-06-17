@@ -41,7 +41,7 @@ def run_simulation(clan,n,adapter,output_file_name,run_time=35):
             print ""
         #refresh random status
         fitness_contribution_table = clan.landscape.fitness_contribution_table
-        fitness_contribution_table.refresh(i+1)
+        fitness_contribution_table.refresh(i + 1) #increase random seed by 1
         clan.landscape.compute_all_locations_id(fix_plan = clan.landscape.fix_plan)
         if isinstance(clan.landscape,LandscapeAdaptive):
             clan.landscape.fitness_value_dict = {}

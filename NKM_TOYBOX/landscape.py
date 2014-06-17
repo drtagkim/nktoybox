@@ -243,6 +243,7 @@ class Landscape:
             for l_id in xrange(map_size):
                 result_temp_add(self.compute_score_for_location_id(l_id,fix_plan = fix_plan))
             self.fitness_value = NP.array(result_temp)
+        self.standardize()
     def compute_score_for_location_id(self,location_id,fix_plan=None,reduced=True):
         """
 |  Compute and return the fitness value of the given location id.
@@ -481,13 +482,7 @@ Once a landscape is created, every delta periods, each contribution value c_i
         assert len(self.fitness_value_dict) > 0, "No fitness values are assigned."
         fitness_value = NP.array(self.fitness_value_dict.values())
         self.fitness_max = NP.max(fitness_value)
-        self.fitness_min = NP.min(fitness_value)
-        self.fitness_mean = NP.mean(fitness_value)
-        standardized_fitness = fitness_value / self.fitness_max
-        self.standardized_fitness_value_dict = dict(zip(self.fitness_value_dict.keys(),standardized_fitness))
     def get_standardized_value(self,fitness_value):
-        if self.standardized_fitness_value_dict == None:
-            self.standardize()
         return fitness_value / float(self.fitness_max)
 class Probe:
     """
