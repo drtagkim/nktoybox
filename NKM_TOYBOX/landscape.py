@@ -197,6 +197,7 @@ class Landscape:
         self.influence_matrix = influence_matrix
         self.locations_list = []
         self.fitness_value = NP.array([])
+        self.fix_plan = None
         self.standardized_fitness_value = None
         if influence_matrix != None and fitness_contribution_matrix == None:
             self.influence_matrix = influence_matrix
@@ -204,6 +205,14 @@ class Landscape:
         elif influence_matrix == None and fitness_contribution_matrix != None:
             self.fitness_contribution_table = fitness_contribution_matrix
             self.influence_matrix = fitness_contribution_matrix.influence_matrix
+    def clear(self):
+        self.locations_list = []
+        self.fitness_value = NP.array([])
+        self.fix_plan = None
+        self.standardized_fitness_value = None
+        self.fitness_max = None
+        self.fitness_min = None
+        self.fitness_mean = None
     def get_influence_matrix_N(self):
         return self.influence_matrix.my_N
     def get_influence_matrix_K(self):
@@ -433,9 +442,16 @@ class LandscapeAdaptive(Landscape):
                            fitness_contribution_matrix = fitness_contribution_matrix, 
                            precision = precision)
         self.fitness_value_dict = {} # main data set
+        self.fitness_e_value_dict = {} # sub data set for uncertainty TODO
         self.fitness_correction_item = {} #c_i for algorithm
-        self.fix_plan = None
         self.standardized_fitness_value_dict = None
+    def clear(self):
+        self.fitness_value_dict = {} # main data set
+        self.fitness_e_value_dict = {} # sub data set for uncertainty TODO
+        self.fitness_correction_item = {} #c_i for algorithm
+        self.standardized_fitness_value_dict = None
+        self.fix_plan = None
+        self.fitness_max = None
     def compute_all_locations_id(self, fix_plan=None, calculate_now = False):
         """
 |  Brutely compute all before we do something
@@ -476,7 +492,8 @@ Once a landscape is created, every delta periods, each contribution value c_i
             self.fitness_value_dict[location_id],c_i = self.compute_score_for_location_id(location_id,fix_plan=self.fix_plan,reduced=False)
             self.fitness_correction_item[location_id] = c_i
             #if there is no true fitness value is not defined, update it.
-        e_i = func(c_i=c_i, **kargs)
+        e_i = func(c_i=c_i, **kargs) #noise function
+        self.fitness_e_value_dict[location_id] = e_i
         return e_i
     def standardize(self):
         assert len(self.fitness_value_dict) > 0, "No fitness values are assigned."

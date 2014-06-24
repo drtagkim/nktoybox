@@ -148,6 +148,7 @@ class Agent:
     '''
     def __init__(self,my_id,my_clan):
         self.my_id  = my_id
+        self.my_name = ""
         self.performance = 0.0 #this is default value of getting fitness value
         self.my_clan = my_clan #landscape
         self.my_status = -1

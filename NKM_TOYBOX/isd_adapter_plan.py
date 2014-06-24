@@ -10,6 +10,7 @@ Jungpil and Taekyung
 '''
 
 import numpy as np
+import copy
 from algorithm import linear_uncertainty
 from simulator import AdapterPlan
 from isd_agent import AgileDeveloper, WaterfallDeveloper
@@ -26,6 +27,7 @@ class AdapterPlanISD(AdapterPlan):
                              agent_clan = agent_clan, 
                              agent = agent, 
                              tick_end = tick_end)
+        self.simulator.time_box = True #default setting
     def my_profile(cls):
         return "\nPlan for ISD Development Simulation\n"
     profile = classmethod(my_profile)
@@ -61,9 +63,16 @@ class AdapterPlanISD(AdapterPlan):
         # Do not want to go somewhere now...
         #### SEARCHING ####
         q = agent.tick_end / len(agent.plans)
-        
+        plan_history = []
         for plan in agent.plans: #per each plan
-            while 1:
+            # fixplan
+            plan_history.extend(plan)
+            if self.simulator.fix_plan_on:
+                fix_plan = list(set(plan_history))
+                landscape.fix_plan = copy.deepcopy(fix_plan)
+            travel = True
+            location_before = agent.my_id
+            while travel:
                 agent.ct = ct # let him know the current tick(=time)
                 (agent.my_id, agent.true_performance) = current_behavior.execute(agent, plan) #update
                 agent.performance = agent.true_performance
@@ -71,20 +80,35 @@ class AdapterPlanISD(AdapterPlan):
                 self.simulator.write_record(agent) # write a record after work
                 # for agile
                 if isinstance(agent, AgileDeveloper):
-                    if ct != 0 and ct % q == 0: #break point
-                        #feedback
-                        agent.I = agent.I + 1 # reduce uncertainty if, an agile developer
-                        agent.expected_performance = agent.true_performance # let the agent know about the true performance
+                    if self.simulator.time_box:
+                        if ct != 0 and ct % q == 0: #break point
+                            #feedback
+                            agent.I = agent.I + 1 # reduce uncertainty if, an agile developer
+                            agent.expected_performance = agent.true_performance # let the agent know about the true performance
+                            if ct >= self.tick_end:
+                                break_marker = True
+                            break
                         if ct >= self.tick_end:
                             break_marker = True
-                        break
-                    if ct >= self.tick_end:
-                        break_marker = True
-                        break
-                if ct >= self.tick_end: # if ticks are over the target number,
-                    break_marker = True # let the break mark true
-                    break # stop improving
+                            break
+                    else:
+                        if agent.my_id == location_before:
+                            travel = False
+                        else:
+                            location_before = agent.my_id
+                else:
+                    if self.simulator.time_box:
+                        if ct >= self.tick_end: # if ticks are over the target number,
+                            break_marker = True # let the break mark true
+                            break # stop improving
+                    else:
+                        if agent.my_id == location_before:
+                            travel = False
+                        else:
+                            location_before = agent.my_id
             # finalize
+            if self.simulator.fix_plan_on:
+                landscape.clear() # reset simplifiability and uncertainty effects for next iteration
             if break_marker == True:
                 break
 # END OF PROGRAM #

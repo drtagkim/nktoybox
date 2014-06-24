@@ -31,18 +31,23 @@ class AdapterBehaviorAgileTeam(AdapterBehavior):
         np.random.shuffle(neighbors_np) #randomly select configuration (by luck)
         for neighbor_id in np.nditer(neighbors_np):
             neighbor_id_int = int(neighbor_id)
-            new_score = landscape.get_noised_score_of_location_by_id(
-                                neighbor_id_int,
-                                uncertainty_base = self.agent_clan.uncertainty_base,
-                                func = linear_uncertainty,
-                                tick = agent.I,
-                                total_tick = agent.IN)
+            # check first.
+            if landscape.fitness_e_value_dict.has_key(neighbor_id_int):
+                new_score = landscape.fitness_e_value_dict[neighbor_id_int]
+            else: # if found nothing calculate
+                new_score = landscape.get_noised_score_of_location_by_id(
+                                    neighbor_id_int,
+                                    uncertainty_base = self.agent_clan.uncertainty_base,
+                                    func = linear_uncertainty,
+                                    tick = agent.I,
+                                    total_tick = agent.IN)
             if current_score < new_score and not agent.visited_ids.has_key(int(neighbor_id)):
                 agent.wanna_be_my_id = neighbor_id_int
                 new_id = neighbor_id_int # jump to the location, no feedback
                 agent.visited_ids[new_id]='v'
                 new_performance = landscape.get_score_of_location_by_id(new_id)
                 agent.expected_performance = new_score
+                break # experiential search
         return (new_id,new_performance)
     def my_profile(cls):
         rv = "----------------------------\n%s\n----------------------------\n" % ("Agile Development Team")
@@ -66,18 +71,23 @@ class AdapterBehaviorWaterfallTeam(AdapterBehavior):
         np.random.shuffle(neighbors_np) #randomly select configuration (by luck)
         for neighbor_id in np.nditer(neighbors_np):
             neighbor_id_int = int(neighbor_id)
-            new_score = landscape.get_noised_score_of_location_by_id(
-                                neighbor_id_int,
-                                uncertainty_base = self.agent_clan.uncertainty_base,
-                                func = linear_uncertainty,
-                                tick = agent.I,
-                                total_tick = agent.IN)            
+            # check first.
+            if landscape.fitness_e_value_dict.has_key(neighbor_id_int):
+                new_score = landscape.fitness_e_value_dict[neighbor_id_int]
+            else: # if found nothing calculate
+                new_score = landscape.get_noised_score_of_location_by_id(
+                                    neighbor_id_int,
+                                    uncertainty_base = self.agent_clan.uncertainty_base,
+                                    func = linear_uncertainty,
+                                    tick = agent.I,
+                                    total_tick = agent.IN)            
             if current_score < new_score and not agent.visited_ids.has_key(int(neighbor_id)):
                 agent.wanna_be_my_id = neighbor_id_int
                 new_id = neighbor_id_int # jump to the location, no feedback
                 agent.visited_ids[new_id]='v'
                 new_performance = landscape.get_score_of_location_by_id(new_id)
                 agent.expected_performance = new_score
+                break # experiential search
         return (new_id,new_performance)
     def my_profile(cls):
         rv = "----------------------------\n%s\n----------------------------\n" % ("Waterfall Development Team")

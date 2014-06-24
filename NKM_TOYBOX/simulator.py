@@ -14,7 +14,8 @@ import RandomGenerator
 from landscape import LandscapeAdaptive
 
 class SimRecord:
-    def __init__(self, my_id, plan, ct, performance, sim_code, random_seed):
+    def __init__(self, my_name, my_id, plan, ct, performance, sim_code, random_seed):
+        self.my_name = my_name
         self.location_id = my_id
         self.plan = self.str_plan(plan)
         self.ct = ct
@@ -32,6 +33,7 @@ class Simulator:
         self.sim_code = 0
         self.random_seed = -1
         self.note="" #for database recording
+        self.fix_plan_on = False
     def run(self, tick_end, adapter_plan, adapter_behavior):
         #
         self.current_record = []
@@ -50,7 +52,7 @@ class Simulator:
                 record.performance = agent_clan.landscape.get_standardized_value(record.performance)
         self.simulation_record.extend(copy.deepcopy(self.current_record))
     def write_record(self,agent):
-        sr = SimRecord(agent.my_id, agent.plans, agent.ct, agent.performance, self.sim_code, self.random_seed)
+        sr = SimRecord(agent.my_name, agent.my_id, agent.plans, agent.ct, agent.performance, self.sim_code, self.random_seed)
         self.current_record.append(sr)
     def export_record(self,file_name):
         #for plot
@@ -70,7 +72,8 @@ class Simulator:
         cursor = conn.cursor() #cursor
         # create schema
         sql = """CREATE TABLE IF NOT EXISTS nk_record 
-            (location_id NUMBER,
+            (agent_name TEXT,
+            location_id NUMBER,
             tick NUMBER,
             plan TEXT,
             performance NUMBER,
@@ -83,10 +86,10 @@ class Simulator:
         cursor.execute(sql)
         conn.commit()
         sql = """INSERT INTO nk_record 
-                (location_id,tick,plan,performance,simulation_code,random_seed,processing_power,N,K,note) 
-                VALUES (?,?,?,?,?,?,?,?,?,?);"""
+                (agent_name,location_id,tick,plan,performance,simulation_code,random_seed,processing_power,N,K,note) 
+                VALUES (?,?,?,?,?,?,?,?,?,?,?);"""
         for sr in self.simulation_record:
-            cursor.execute(sql,(sr.location_id, sr.ct, sr.plan, sr.performance, sr.sim_code, sr.random_seed,processing_power,land_n,land_k,self.note))
+            cursor.execute(sql,(sr.my_name, sr.location_id, sr.ct, sr.plan, sr.performance, sr.sim_code, sr.random_seed,processing_power,land_n,land_k,self.note))
         conn.commit()
         conn.close()
         #for profile

@@ -68,6 +68,8 @@ class AgileDeveloperClan(AgentClan):
             agent.visited_ids[member_loc_id] = 'v' #visit
             # set up visited (of course, it can be duplicated at the stage of defining the initial status)
             agent.plans = copy.deepcopy(self.iteration_plan)
+            # name
+            agent.my_name = "%04d_%s" % (_,"agile",)
             # inherits plans...
             add_member(agent)
             # assign the agent as a clan member
@@ -109,6 +111,7 @@ class WaterfallDeveloperClan(AgentClan):
             agent.visited_ids[member_loc_id] = 'v'
             agent.plans = copy.deepcopy(self.iteration_plan)
             agent.feedback_tick = self.feedback_tick
+            agent.my_name = "%04d_%s" % (_,"waterfall",)
             add_member(agent)
         self.number_of_not_finished = self.total_num
     def __str__(self):
