@@ -36,12 +36,19 @@ def factory_wf_clan(land,plans):
     wf_clan.set_iteration_plan(plans)
     wf_clan.hatch_members()
     return wf_clan
-def run_simulation(clan,n,adapter,output_file_name,run_time=35):
+def run_simulation(clan,n,adapter,output_file_name,
+                   run_time = 35,
+                   time_box = False,
+                   fix_plan_on = False):
     """
 |  default time tick = 35
 |  for testing
     """
     sim1 = simulator.Simulator(clan)
+    # SIMULATION SETTING
+    sim1.time_box = time_box # time boxing
+    sim1.fix_plan_on = fix_plan_on # fix model
+    # RUN SIMULATIONS
     for i in xrange(n):
         sim1.run(run_time,AdapterPlanISD,adapter)
         sys.stdout.write("%04d ... " % i)
@@ -65,20 +72,30 @@ def run_simulation_group(clan_wf,
                          output_file_name_wf,
                          output_file_name_ag,
                          note,                         
-                         run_time=35):
+                         run_time = 35,
+                         time_box = False,
+                         fix_plan_on = False):
     """
 |  simulator
     """
+    # REFERENCE
+    landscape = clan_wf.landscape
+    # SIMULATORS
     sim1 = simulator.Simulator(clan_wf)
     sim2 = simulator.Simulator(clan_ag)
+    # SIMULATION SETTINGS
+    sim1.time_box = time_box
+    sim2.time_box = time_box
+    sim1.fix_plan_on = fix_plan_on
+    sim2.fix_plan_on = fix_plan_on
     sim1.note = "%s_waterfall"%note # note appendix (waterfall)
     sim2.note = "%s_agile"%note # note appendix (agile)
-    landscape = clan_wf.landscape
+    # RUN SIMULATIONS
     for i in xrange(n):
-        sys.stdout.write(" WF ")
+        sys.stdout.write(".WF.")
         sys.stdout.flush()
         sim1.run(run_time,AdapterPlanISD,adapter_wf)
-        sys.stdout.write(" AG ")
+        sys.stdout.write(".AG.")
         sys.stdout.flush()
         sim2.run(run_time,AdapterPlanISD,adapter_ag)
         sys.stdout.write("%04d ... " % i)

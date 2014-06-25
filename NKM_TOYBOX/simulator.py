@@ -47,7 +47,7 @@ class Simulator:
             my_plan = adapter_plan(self, adapter_behavior, agent_clan, agent, tick_end)
             my_plan.run()
         if isinstance(agent_clan.landscape, LandscapeAdaptive):
-            agent_clan.landscape.standardize()
+            #agent_clan.landscape.standardize()
             for record in self.current_record:
                 record.performance = agent_clan.landscape.get_standardized_value(record.performance)
         self.simulation_record.extend(copy.deepcopy(self.current_record))

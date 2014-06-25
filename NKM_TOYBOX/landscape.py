@@ -199,6 +199,7 @@ class Landscape:
         self.fitness_value = NP.array([])
         self.fix_plan = None
         self.standardized_fitness_value = None
+        self.fitness_max = -1
         if influence_matrix != None and fitness_contribution_matrix == None:
             self.influence_matrix = influence_matrix
             self.fitness_contribution_table = FitnessContributionTable(self.influence_matrix) # KEY!
@@ -206,13 +207,11 @@ class Landscape:
             self.fitness_contribution_table = fitness_contribution_matrix
             self.influence_matrix = fitness_contribution_matrix.influence_matrix
     def clear(self):
-        self.locations_list = []
+        #self.locations_list = []
         self.fitness_value = NP.array([])
         self.fix_plan = None
         self.standardized_fitness_value = None
-        self.fitness_max = None
-        self.fitness_min = None
-        self.fitness_mean = None
+        #self.fitness_max = -1
     def get_influence_matrix_N(self):
         return self.influence_matrix.my_N
     def get_influence_matrix_K(self):
@@ -252,7 +251,7 @@ class Landscape:
             for l_id in xrange(map_size):
                 result_temp_add(self.compute_score_for_location_id(l_id,fix_plan = fix_plan))
             self.fitness_value = NP.array(result_temp)
-        self.standardize()
+        self.fitness_max = NP.max(self.fitness_value)
     def compute_score_for_location_id(self,location_id,fix_plan=None,reduced=True):
         """
 |  Compute and return the fitness value of the given location id.
@@ -328,6 +327,9 @@ See also, the topic of dealing uncertainty in the documentation.
         else:
             average_effect_from_unknown = 0.0
         # output form
+        # update max
+        if self.fitness_max < average_effect_from_unknown:
+            self.fitness_max = average_effect_from_unknown
         if reduced:
             return average_effect_from_unknown
         else:
@@ -424,15 +426,14 @@ See also, the topic of dealing uncertainty in the documentation.
         for i in changable_elements:
             locations[i] = location_masks[i]
         return self.location_to_location_id(list(locations))
-    def standardize(self):
-        assert len(self.fitness_value) > 0, "No fitness values are assigned."
-        self.fitness_max = NP.max(self.fitness_value)
-        self.fitness_min = NP.min(self.fitness_value)
-        self.fitness_mean = NP.mean(self.fitness_value)
-        self.standardized_fitness_value = self.fitness_value / self.fitness_max
+    #def standardize(self):
+        #assert len(self.fitness_value) > 0, "No fitness values are assigned."
+        #self.fitness_max = NP.max(self.fitness_value)
+        #self.fitness_min = NP.min(self.fitness_value)
+        #self.fitness_mean = NP.mean(self.fitness_value)
+        #self.standardized_fitness_value = self.fitness_value / self.fitness_max
     def get_standardized_value(self,fitness_value):
-        if self.standardized_fitness_value == None:
-            self.standardize()
+        assert self.fitness_max >= 0.0,""
         return fitness_value / float(self.fitness_max)
 # =====================================
 class LandscapeAdaptive(Landscape):
@@ -451,7 +452,6 @@ class LandscapeAdaptive(Landscape):
         self.fitness_correction_item = {} #c_i for algorithm
         self.standardized_fitness_value_dict = None
         self.fix_plan = None
-        self.fitness_max = None
     def compute_all_locations_id(self, fix_plan=None, calculate_now = False):
         """
 |  Brutely compute all before we do something
@@ -495,12 +495,10 @@ Once a landscape is created, every delta periods, each contribution value c_i
         e_i = func(c_i=c_i, **kargs) #noise function
         self.fitness_e_value_dict[location_id] = e_i
         return e_i
-    def standardize(self):
-        assert len(self.fitness_value_dict) > 0, "No fitness values are assigned."
-        fitness_value = NP.array(self.fitness_value_dict.values())
-        self.fitness_max = NP.max(fitness_value)
-    def get_standardized_value(self,fitness_value):
-        return fitness_value / float(self.fitness_max)
+    #def standardize(self):
+        #assert len(self.fitness_value_dict) > 0, "No fitness values are assigned."
+        #fitness_value = NP.array(self.fitness_value_dict.values())
+        #self.fitness_max = NP.max(fitness_value)
 class Probe:
     """
 |  An agent for searching local peaks.
